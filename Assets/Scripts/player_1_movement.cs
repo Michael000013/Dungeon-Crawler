@@ -1,45 +1,38 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class player_1_movement : MonoBehaviour
+public class player_1_movement:MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed;
+    public Rigidbody2D rd;
+    [SerializeField] Transform hand;
 
-    private Rigidbody2D rb;
-    private Vector2 movement;
-
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
+    Vector2 movement;
 
     void Update()
     {
-        movement = Vector2.zero;
+        MovementInput();
+        RotateHand();
 
-        if (Keyboard.current.aKey.isPressed)
-        {
-            movement.x = -1f;
-        }
-
-        if (Keyboard.current.dKey.isPressed)
-        {
-            movement.x = 1f;
-        }
-
-        if (Keyboard.current.wKey.isPressed)
-        {
-            movement.y = 1f;
-        }
-
-        if (Keyboard.current.sKey.isPressed)
-        {
-            movement.y = -1f;
-        }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        rb.linearVelocity = movement.normalized * moveSpeed;
+        rd.linearVelocity = movement * moveSpeed;
+    }
+
+    void RotateHand()
+    {
+        float angle = Utility.AngleTowardsMouse(hand.position);
+        hand.rotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
+    }
+
+    void MovementInput()
+    {
+        float mx = Input.GetAxisRaw("Horizontal");
+        float my = Input.GetAxisRaw("Vertical");
+
+        movement = new Vector2(mx, my).normalized;
     }
 }
