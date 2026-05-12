@@ -1,81 +1,61 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
-    public Camera playerCamera;
-    public float walkSpeed = 6f;
-    public float runSpeed = 12f;
-    public float jumpPower = 7f;
-    public float gravity = 10f;
-    public float lookSpeed = 2f;
-    public float lookXLimit = 45f;
-    public float defaultHeight = 2f;
-    public float crouchHeight = 1f;
-    public float crouchSpeed = 3f;
+    [Header("Movement")]
+    public float walkSpeed = 5f;
+    public float sprintSpeed = 9f;
 
-    private Vector3 moveDirection = Vector3.zero;
-    private float rotationX = 0;
-    private CharacterController characterController;
+    [Header("Sprint Stamina")]
+    public float maxStamina = 3f;        // seconds of sprint
+    public float staminaRegenRate = 1.2f;
+    public float staminaDrainRate = 1f;
 
-    private bool canMove = true;
+    private float currentStamina;
 
-    void Start()
+    private Rigidbody rb;
+    private Vector3 moveInput;
+    private bool isSprinting;
+
+    private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        rb = GetComponent<Rigidbody>();
+        currentStamina = maxStamina;
     }
 
-    void Update()
+    private void Update()
     {
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
+        // Get movement input
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector3(x, 0f, z).normalized;
 
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
-        float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+        // Sprint input
+        isSprinting = Input.GetKey(KeyCode.LeftShift) && currentStamina > 0f;
 
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+        
+    }
+
+    private void FixedUpdate()
+    {
+        float speed = walkSpeed;
+
+        if (isSprinting)
         {
-            moveDirection.y = jumpPower;
+            speed = sprintSpeed;
+            currentStamina -= staminaDrainRate * Time.fixedDeltaTime;
         }
         else
         {
-            moveDirection.y = movementDirectionY;
+            currentStamina += staminaRegenRate * Time.fixedDeltaTime;
         }
 
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-        }
+        currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
 
-        if (Input.GetKey(KeyCode.R) && canMove)
-        {
-            characterController.height = crouchHeight;
-            walkSpeed = crouchSpeed;
-            runSpeed = crouchSpeed;
-
-        }
-        else
-        {
-            characterController.height = defaultHeight;
-            walkSpeed = 6f;
-            runSpeed = 12f;
-        }
-
-        characterController.Move(moveDirection * Time.deltaTime);
-
-        if (canMove)
-        {
-            rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
-            rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
-        }
+        rb.linearVelocity = new Vector3(
+            moveInput.x * speed,
+            rb.linearVelocity.y,
+            moveInput.z * speed
+        );
     }
 }
