@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LevelTimer : MonoBehaviour
 {
-    public float levelTime = 60f; // seconds
+    public float levelTime = 75f; // seconds
+
+    public Text timerText;
 
     private float currentTime;
     private bool timerActive = true;
@@ -14,16 +17,16 @@ public class LevelTimer : MonoBehaviour
     }
 
     private void Update()
-    {
-        if (!timerActive) return;
+{
+    if (!timerActive) return;
+    currentTime -= Time.deltaTime;
 
-        currentTime -= Time.deltaTime;
+    // Display the time as a whole number
+    if (timerText != null)
+        timerText.text = "Time: " + Mathf.Ceil(currentTime).ToString();
 
-        if (currentTime <= 0f)
-        {
-            TimeUp();
-        }
-    }
+    if (currentTime <= 0f) TimeUp();
+}
 
     private void TimeUp()
     {

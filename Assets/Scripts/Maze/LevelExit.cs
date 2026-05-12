@@ -3,16 +3,25 @@ using UnityEngine.SceneManagement;
 
 public class LevelExit : MonoBehaviour
 {
+
     private void OnTriggerEnter(Collider other)
+{
+    if (other.CompareTag("Player"))
     {
-        if (!other.CompareTag("Player")) return;
+        // Get the current scene's index and add 1 to it
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
 
-        LevelTimer timer = FindObjectOfType<LevelTimer>();
-        if (timer != null)
+        // Check if there is actually a next scene to load
+        if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
         {
-            timer.StopTimer();
+            SceneManager.LoadScene(nextSceneIndex);
         }
-
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        else
+        {
+            // If there are no more levels, go back to the Main Menu
+            SceneManager.LoadScene(0);
+        }
     }
+}
+
 }

@@ -16,6 +16,8 @@ public Camera fpsCam;
 public Transform attackPoint;
 public bool allowInvoke = true;
 public TextMeshProUGUI ammunitionDisplay;
+
+public GameObject projectile; // FIX: This was missing!
 private void awake()
 {
   bulletsLeft = magazineSize;
@@ -32,7 +34,7 @@ private void Update()
 private void MyInput()
 {
     //Shoot with F
-  if (allowButtonHold) shooting = Input.GetKey(KeyCode.f);
+  if (allowButtonHold) shooting = Input.GetKey(KeyCode.F); // FIX: Changed from f to F key for shooting
   else shooting = Input.GetKeyDown(KeyCode.Mouse0);
     if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading) Reload();
   if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading) Reload();
